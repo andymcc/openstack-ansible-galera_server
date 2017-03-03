@@ -19,6 +19,7 @@ galera_server_package_state: "latest"
 
 galera_cluster_members: "{{ groups['galera_all'] }}"
 galera_server_bootstrap_node: "{{ galera_cluster_members[0] }}"
+galera_server_secondary_node: "{{ (galera_cluster_members | length > 1) | ternary(galera_cluster_members[1], 'Single node cluster') }}"
 galera_ignore_cluster_state: false
 galera_upgrade: false
 

@@ -47,9 +47,37 @@
     - galera-cluster-state-check
     - galera-bootstrap
 
+# If this is the bootstrap node lets determine if the cluster
+# is already up before we re-bootstrap.
+- name: Check if remote WSREP is ready
+  shell: "/usr/bin/mysqladmin {{ mysql_extra_args }} extended-status -h {{ hostvars[galera_server_secondary_node]['ansible_host'] }} | egrep '(wsrep_ready|wsrep_evs_state)'"
+  changed_when: >
+    _remote_mysql_ready.rc != 0
+  register: _remote_mysql_ready
+  until:
+    - _remote_mysql_ready.rc == 0
+    - (_remote_mysql_ready.stdout).find("ON") != -1
+  retries: "{{ num_retries }}"
+  delay: "{{ wait_delay }}"
+  failed_when: false
+  when:
+    - inventory_hostname == galera_server_bootstrap_node
+    - _mysql_running.rc != 0
+    - galera_cluster_members | length > 1
+  tags:
+    - galera-cluster-state-check
+    - galera-bootstrap
+
 - name: Set running state fact
   set_fact:
     mysql_running: "{{ _mysql_running }}"
+  tags:
+    - galera-cluster-state-check
+    - galera-bootstrap
+
+- name: Set remote state fact
+  set_fact:
+    mysql_remote_running: "{{ _remote_mysql_ready | default({'rc' : 1}) }}"
   tags:
     - galera-cluster-state-check
     - galera-bootstrap

@@ -24,6 +24,7 @@
     - ansible_service_mgr == 'systemd'
     - inventory_hostname == galera_server_bootstrap_node
     - mysql_running.rc != 0
+    - mysql_remote_running.rc != 0
   register: start_cluster
   failed_when: false
   tags:
@@ -37,6 +38,7 @@
     - start_cluster | failed
     - inventory_hostname == galera_server_bootstrap_node
     - mysql_running.rc != 0
+    - mysql_remote_running.rc != 0
   tags:
     - galera-bootstrap
 
@@ -50,6 +52,7 @@
   when:
     - inventory_hostname == galera_server_bootstrap_node
     - mysql_running.rc != 0
+    - mysql_remote_running.rc != 0
   tags:
     - galera-operational
     - galera-bootstrap
@@ -60,6 +63,7 @@
   when:
     - inventory_hostname == galera_server_bootstrap_node
     - mysql_running.rc != 0
+    - mysql_remote_running.rc != 0
   tags:
     - galera-operational
     - galera-bootstrap
